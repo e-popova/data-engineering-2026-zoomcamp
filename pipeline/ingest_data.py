@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import click
 import pandas as pd
 from sqlalchemy import create_engine
 from tqdm.auto import tqdm
@@ -31,29 +32,34 @@ parse_dates = [
 ]
 
 
-def run():
-    pg_user = 'root'
-    pg_pass = 'root'
-    pg_host = 'localhost'
-    pg_db = 'ny_taxi'
-    pg_port = 5432
+@click.command()
+@click.option('--user', default='root', help='PostgreSQL user')
+@click.option('--password', default='root', help='PostgreSQL password')
+@click.option('--host', default='localhost', help='PostgreSQL host')
+@click.option('--db', default='ny_taxi', help='PostgreSQL database')
+@click.option('--port', default=5432, type=int, help='PostgreSQL port')
+@click.option('--year', default=2021, type=int, help='Year of data')
+@click.option('--month', default=1, type=int, help='Month of data')
+@click.option('--chunksize', default=100000, type=int, help='Chunk size for reading CSV')
+@click.option('--table', default='yellow_taxi_data', help='Target table name for trips')
+@click.option('--zonestable', default='zones', help='Target table name for zones')
 
-    year = 2021
-    month = 1
 
-    chunksize = 100000
+def run(user, password, host, db, port, year, month, chunksize, table, zonestable):
+    prefix_trips = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/'
+    file_name_trips = f'yellow_tripdata_{year}-{month:02d}.csv.gz'
+    url_trips = f'{prefix_trips}/{file_name_trips}'
 
-    target_table = 'yellow_taxi_data'
+    prefix_zones = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/'
+    file_name_zones = 'taxi_zone_lookup.csv'
+    url_zones = f'{prefix_zones}/{file_name_zones}'
 
-    prefix = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/'
-    file_name = f'yellow_tripdata_{year}-{month:02d}.csv.gz'
 
-    url = f'{prefix}/{file_name}'
+    engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
 
-    engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
-
+    # Read and ingest trips data in chunks
     df_iter = pd.read_csv(
-        url,
+        url_trips,
         dtype=dtype,
         parse_dates=parse_dates,
         chunksize=chunksize,
@@ -63,9 +69,14 @@ def run():
 
     for df_chunk in tqdm(df_iter):
         if first:
-            df_chunk.to_sql(name=target_table, con=engine, if_exists='replace')
+            df_chunk.to_sql(name=table, con=engine, if_exists='replace')
             first = False
-        df_chunk.to_sql(name=target_table, con=engine, if_exists='append')
+        else:
+            df_chunk.to_sql(name=table, con=engine, if_exists='append')
+
+    # Read and ingest zones data
+    df = pd.read_csv(url_zones)
+    df.to_sql(name=zonestable, con=engine, if_exists='replace')
 
 
 if __name__ == '__main__':
