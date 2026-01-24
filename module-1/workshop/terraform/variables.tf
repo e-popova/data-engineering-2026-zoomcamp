@@ -10,7 +10,7 @@ variable "project" {
 
 variable "location" {
   description = "Project location"
-  default     = "EU"
+  default     = "europe-north1"
 }
 
 variable "region" {

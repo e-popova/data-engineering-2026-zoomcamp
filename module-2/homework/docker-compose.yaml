@@ -1,0 +1,68 @@
+volumes:
+  kestra_postgres_data:
+    driver: local
+  kestra_data:
+    driver: local
+
+services:
+  kestra_postgres:
+    image: postgres:18
+    volumes:
+      - kestra_postgres_data:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: kestra
+      POSTGRES_USER: kestra
+      POSTGRES_PASSWORD: kestra
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  kestra:
+    image: kestra/kestra:v1.1
+    pull_policy: always
+    user: "root"
+    command: server standalone
+    volumes:
+      - kestra_data:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/kestra-wd:/tmp/kestra-wd
+    environment:
+      SECRET_GOOGLE_CREDS: ${GOOGLE_CREDS}
+
+      KESTRA_CONFIGURATION: |
+        datasources:
+          postgres:
+            url: jdbc:postgresql://kestra_postgres:5432/kestra
+            driverClassName: org.postgresql.Driver
+            username: kestra
+            password: kestra
+        kestra:
+          server:
+            basicAuth:
+              username: "admin@admin.com"
+              password: Qwerty123!
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              basePath: "/app/storage"
+          queue:
+            type: postgres
+          ai:
+            type: gemini
+            gemini:
+              model-name: gemini-2.5-flash
+              api-key: ${GEMINI_API_KEY}
+          tasks:
+            tmpDir:
+              path: /tmp/kestra-wd/tmp
+          url: http://localhost:8080/
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      kestra_postgres:
+        condition: service_started

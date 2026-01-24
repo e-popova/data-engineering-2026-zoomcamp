@@ -1,0 +1,81 @@
+id: gcp_taxi
+namespace: zoomcamp
+
+inputs:
+  - id: taxi
+    type: SELECT
+    displayName: Select taxi type
+    values: [yellow, green]
+    defaults: green
+
+  - id: from
+    type: DATE
+    displayName: Select From
+    defaults: 2021-01-01
+
+  - id: to
+    type: DATE
+    displayName: Select to
+    defaults: 2021-07-01
+
+tasks:
+  - id: generate_dates
+    type: io.kestra.plugin.scripts.python.Script
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    dependencies:
+      - date
+      - kestra
+    script: |
+      from kestra import Kestra
+      from datetime import date, datetime
+      
+      def first_days_of_months(from_str: str, to_str: str):
+        start_date = datetime.strptime(from_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(to_str, "%Y-%m-%d").date()
+
+        result = []
+
+        current = start_date.replace(day=1)
+
+        while current <= end_date:
+            result.append(current.strftime("%Y-%m-%d"))
+
+            # переход к первому дню следующего месяца
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1)
+            else:
+                current = current.replace(month=current.month + 1)
+
+        return result
+
+      dates = first_days_of_months("{{inputs.from}}", "{{inputs.to}}")
+
+      Kestra.outputs({"dates": dates})
+
+  - id: for_each
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{outputs.generate_dates.vars.dates}}"
+    tasks:
+      - id: if_yellow_taxi
+        type: io.kestra.plugin.core.flow.If
+        condition: "{{inputs.taxi == 'yellow'}}"
+        then:
+          - id: gcp_taxi_subflow_yellow
+            type: io.kestra.plugin.core.flow.Subflow
+            namespace: zoomcamp
+            flowId: gcp_taxi_subflow
+            inputs:
+              date: "{{parent.taskrun.value}}"
+              taxi: "yellow"
+      - id: if_green_taxi
+        type: io.kestra.plugin.core.flow.If
+        condition: "{{inputs.taxi == 'green'}}"
+        then:
+          - id: gcp_taxi_subflow_green
+            type: io.kestra.plugin.core.flow.Subflow
+            namespace: zoomcamp
+            flowId: gcp_taxi_subflow
+            inputs:
+              date: "{{parent.taskrun.value}}"
+              taxi: "green"

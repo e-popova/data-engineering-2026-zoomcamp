@@ -208,7 +208,11 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 /pipeline/
+
+# keys
 /module-1/workshop/terraform/keys/
+/module-1/workshop/docker_kestra/keys/
+/module-2/homework/keys/
 
 .idea/*
 
