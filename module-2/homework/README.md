@@ -1,7 +1,7 @@
 # Module 2 - Homework 
 ## Implementation Steps
 Prepared docker-compose file: 
-- created docker-compose.yaml to use Kestra locally
+- created docker-compose.yaml to use Kestra
 - put my GCP credentials to keys/my-creds.json (and gitignored that file)
 - used command "cat my-creds.json | base64 -w 0" to encode my credentials to base64
 - used command "export GOOGLE_CREDS='<encoded credentials>'" to set environment variable with encoded string
@@ -13,7 +13,7 @@ Then the following flows were created (see in the [module-2/homework/flows/]())
 - `gcp_taxi.yaml is` the main flow which executes gcp_taxi_subflow.yaml for every month in a given month range
 - `gcp_taxi_subflow.yaml` is a subflow to download, upload to GCP bucket and ingest to bigquery one month of taxi data
 
-## Quiz Questions
+## Quiz Answers
 1. Execute gcp_taxi.yaml with inputs:
     - taxi: yellow
     - from: 2020-12-01
