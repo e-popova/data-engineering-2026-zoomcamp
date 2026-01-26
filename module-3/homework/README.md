@@ -1,3 +1,5 @@
+# Module 3 - Homework
+## Steps
 - Downloaded Parquet files from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 - Manually created a bucket 'bq_homework' in GCP Cloud Storage and uploaded files 
 - Created a dataset 'bq_homework' in GCP BigQuery
