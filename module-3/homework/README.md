@@ -101,7 +101,7 @@
 
 ### Question 8 - Answer
 - The answer is false, because clustering is not always a good idea, e.g.:
-  - if all columns have high cardinality
+  - if the column has low cardinality
   - if the table is small
   - if the most of the queries do not filter or aggregate on the clustered columns
   - if we need to control costs tightly
