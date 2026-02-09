@@ -213,6 +213,7 @@ __marimo__/
 /module-1/workshop/terraform/keys/
 /module-1/workshop/docker_kestra/keys/
 /module-2/homework/keys/
+/module-5/workshop/code/keys/
 
 .idea/*
 
@@ -253,3 +254,11 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+
+#Data
+/module-5/workshop/code/data/
+/module-5/workshop/code/fhvhv/
+
+
+/module-4/homework/logs/
