@@ -1,14 +1,11 @@
-Проделанные действия
+## Steps for project setup:
 
-1. pip install uv
-2. uv init --python=3.13
-3. uv add dbt-bigquery
-4. uv run dbt init
-5. uploaded yellow and green taxi data for 2019 and 2022 to GCP bucket 
-
-gsutil -m cp -r ./raw_for_dbt gs://zoomcamp-de-2026-dbt/
-
-6. created external tables in BigQuery for yellow and green taxi data. Run the query for green and yellow
+1. run `pip install uv`
+2. run `uv init --python=3.13`
+3. run `uv add dbt-bigquery`
+4. run `uv run dbt init`
+5. uploaded yellow and green taxi data for 2019 and 2020 to GCP bucket
+6. created external tables in BigQuery for yellow and green taxi data. Run the query for green and yellow data:
 
 ```
     CREATE OR REPLACE EXTERNAL TABLE `zoomcamp-de-2026.zoomcamp_dbt.external_yellow_tripdata`
@@ -19,7 +16,7 @@ gsutil -m cp -r ./raw_for_dbt gs://zoomcamp-de-2026-dbt/
 ```
 
 
-7. created partitioned table in BigQuery based on external tables (yellow and green)
+7. created partitioned table in BigQuery based on external tables (yellow and green):
 
 ```
     CREATE OR REPLACE TABLE zoomcamp-de-2026.zoomcamp_dbt.yellow_tripdata
@@ -29,7 +26,8 @@ gsutil -m cp -r ./raw_for_dbt gs://zoomcamp-de-2026-dbt/
 ```
    
 8. set up profiles.yml and set target: prod
-9. uv run dbt build
+9. copied the code from the course repository (in case of any errors in my own workshop code)
+9. run `uv run dbt build`
 
 
 ## Quiz Answers
